@@ -34,6 +34,9 @@ async def health_check():
     return {"status": "ok"}
 
 
+app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+
 @app.get("/")
 async def index():
     """Serve the game client."""
