@@ -1,0 +1,350 @@
+/* === CSS VARIABLES === */
+:root {
+  /* Hogwarts Nocturno - Night Sky Palette */
+  --night-deep: #080810;
+  --night-mid: #0f0f1a;
+  --night-light: #181828;
+  --aurora-blue: #5a8fcc;
+  --aurora-purple: #7a5aaa;
+  --aurora-green: #50c878;
+  --star-white: #f0f0f5;
+  --star-blue: #b8c8e8;
+
+  /* Legacy colors (kept for compatibility) */
+  --parchment: #181828;
+  --parchment-dark: #0f0f1a;
+  --parchment-light: #202038;
+  --ink-dark: #e8e8f0;
+  --ink-medium: #a8a8b8;
+
+  /* === UNIFIED ACCENT: Antique Bronze/Copper === */
+  /* Evoca instrumentos mágicos, placas de Hogwarts, elegancia antigua */
+  --accent-primary: #cd9b6a;      /* Bronce cálido principal */
+  --accent-light: #e8c4a0;        /* Bronce claro/highlight */
+  --accent-dark: #a07850;         /* Bronce oscuro/sombra */
+  --accent-muted: #8b7355;        /* Bronce apagado para bordes sutiles */
+  --accent-glow: 0 0 15px rgba(205, 155, 106, 0.4);
+  --accent-glow-strong: 0 0 25px rgba(205, 155, 106, 0.6), 0 0 50px rgba(205, 155, 106, 0.3);
+
+  /* Mystical Purple - Color secundario */
+  --mystic-deep: #1a0a20;         /* Púrpura muy profundo */
+  --mystic-mid: #2a1a3a;          /* Púrpura medio */
+  --mystic-light: #3d2a50;        /* Púrpura claro */
+  --mystic-glow: #8a6aaa;         /* Púrpura brillante para efectos */
+
+  /* Semantic/Feedback Colors */
+  --color-success: #50c878;       /* Verde esmeralda (Slytherin-inspired) */
+  --color-error: #cc4455;         /* Rojo granate elegante */
+  --color-warning: #d4a040;       /* Ámbar cálido */
+
+  /* Torch/Fire effects (para antorchas animadas) */
+  --torch-glow: #e8a060;
+  --torch-glow-light: #f0c080;
+  --torch-core: #ffdd99;
+
+  /* Legacy mappings for compatibility */
+  --gold-accent: var(--accent-primary);
+  --gold-light: var(--accent-light);
+  --gold-dark: var(--accent-dark);
+  --gold-glow: var(--accent-glow);
+  --blood-red: var(--color-error);
+  --blood-red-light: #dd6677;
+  --shadow-purple: var(--mystic-deep);
+  --shadow-purple-light: var(--mystic-mid);
+
+  /* Stone Textures */
+  --stone-gray: #4a4a58;
+  --stone-gray-light: #606070;
+  --stone-gray-dark: #2a2a35;
+
+  /* Semantic Colors */
+  --color-success: #2e7d32;
+  --color-error: var(--blood-red);
+  --color-warning: var(--torch-glow);
+
+  /* Typography */
+  --font-display: 'Cinzel Decorative', cursive;
+  --font-body: 'Crimson Text', serif;
+  --font-mono: 'Source Code Pro', monospace;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --header-height: 60px;
+}
+
+/* === RESET === */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-dark);
+  background: var(--shadow-purple);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* === UTILITY CLASSES === */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* === NIGHT SKY TEXTURE === */
+.parchment-bg {
+  background: linear-gradient(180deg, var(--night-deep) 0%, var(--night-mid) 50%, var(--night-light) 100%);
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--stone-gray-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--stone-gray);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--stone-gray-light);
+}
+
+/* === ANIMATIONS === */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px var(--torch-glow));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px var(--torch-glow));
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* === MAGICAL NIGHT SKY ANIMATIONS === */
+@keyframes aurora-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes twinkle-delay {
+  0%, 100% { opacity: 0.5; }
+  25% { opacity: 0.2; }
+  75% { opacity: 1; }
+}
+
+@keyframes twinkle-slow {
+  0%, 100% { opacity: 0.4; }
+  33% { opacity: 0.8; }
+  66% { opacity: 0.2; }
+}
+
+@keyframes shooting-star {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(300px) translateY(300px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-mist {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateX(20px) translateY(-10px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(-10px) translateY(5px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateX(15px) translateY(-5px);
+    opacity: 0.35;
+  }
+}
+
+@keyframes torch-flame {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: scaleY(1.1) scaleX(0.95);
+    filter: brightness(1.1);
+  }
+  50% {
+    transform: scaleY(0.95) scaleX(1.05);
+    filter: brightness(0.95);
+  }
+  75% {
+    transform: scaleY(1.05) scaleX(0.98);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes rune-glow {
+  0%, 100% {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    opacity: 0.6;
+  }
+  50% {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    opacity: 1;
+  }
+}
+
+/* === ROOT ELEMENT === */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

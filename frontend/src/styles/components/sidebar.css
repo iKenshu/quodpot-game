@@ -1,0 +1,303 @@
+/* === SIDEBAR CONTAINER - STONE TOWER === */
+.sidebar {
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--mystic-deep) 0%, var(--night-deep) 100%);
+  border-right: 2px solid var(--accent-muted);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stone texture pattern */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='50' height='25' fill='%23ffffff' fill-opacity='0.015' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='50' y='0' width='50' height='25' fill='%23ffffff' fill-opacity='0.01' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='25' y='25' width='50' height='25' fill='%23ffffff' fill-opacity='0.02' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='0' y='25' width='25' height='25' fill='%23ffffff' fill-opacity='0.008' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='75' y='25' width='25' height='25' fill='%23ffffff' fill-opacity='0.015' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='0' y='50' width='50' height='25' fill='%23ffffff' fill-opacity='0.01' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='50' y='50' width='50' height='25' fill='%23ffffff' fill-opacity='0.02' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='25' y='75' width='50' height='25' fill='%23ffffff' fill-opacity='0.015' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='0' y='75' width='25' height='25' fill='%23ffffff' fill-opacity='0.01' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3Crect x='75' y='75' width='25' height='25' fill='%23ffffff' fill-opacity='0.008' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='0.5'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* Subtle ambient glow */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(205, 155, 106, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(205, 155, 106, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.sidebar-header {
+  padding: var(--space-lg);
+  text-align: center;
+  border-bottom: 2px solid var(--accent-muted);
+  background: linear-gradient(180deg, rgba(205, 155, 106, 0.08) 0%, transparent 100%);
+  position: relative;
+  z-index: 1;
+}
+
+/* Decorative flourish */
+.sidebar-header::before {
+  content: '✦';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--accent-primary);
+  opacity: 0.5;
+}
+
+.sidebar-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--accent-light);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 15px rgba(205, 155, 106, 0.4);
+  position: relative;
+  z-index: 1;
+}
+
+/* === STATION TOWER === */
+.station-tower {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-md);
+  overflow-y: auto;
+  gap: var(--space-sm);
+  position: relative;
+  z-index: 1;
+}
+
+/* === STATION LEVEL === */
+.station-level {
+  position: relative;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(42, 26, 58, 0.4) 0%, rgba(26, 10, 32, 0.5) 100%);
+  border: 1px solid rgba(205, 155, 106, 0.15);
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.station-level:hover {
+  background: linear-gradient(135deg, rgba(42, 26, 58, 0.5) 0%, rgba(26, 10, 32, 0.6) 100%);
+  border-color: rgba(205, 155, 106, 0.25);
+}
+
+.station-level--current {
+  background: linear-gradient(135deg, rgba(205, 155, 106, 0.15) 0%, rgba(205, 155, 106, 0.08) 100%);
+  border-color: var(--accent-primary);
+  box-shadow:
+    0 0 20px rgba(205, 155, 106, 0.2),
+    inset 0 0 20px rgba(205, 155, 106, 0.05);
+}
+
+.station-level--active {
+  border-color: rgba(232, 160, 96, 0.4);
+}
+
+/* Station number */
+.station-number {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  min-width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.station-number-label {
+  font-size: 0.6rem;
+  color: var(--accent-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.station-number-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(205, 155, 106, 0.3);
+}
+
+.station-level--current .station-number {
+  color: var(--accent-light);
+  text-shadow: 0 0 12px rgba(232, 196, 160, 0.5);
+}
+
+/* Player indicators */
+.station-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.player-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--torch-glow);
+  box-shadow: 0 0 8px var(--torch-glow);
+  animation: flicker 2s ease-in-out infinite;
+}
+
+.player-dot--self {
+  background: var(--accent-light);
+  box-shadow: 0 0 12px var(--accent-primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Current marker */
+.current-marker {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 10px solid var(--accent-primary);
+  filter: drop-shadow(0 0 6px rgba(205, 155, 106, 0.6));
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Torch decoration */
+.torch-glow {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 10px;
+  background: linear-gradient(180deg, var(--torch-core) 0%, var(--torch-glow) 50%, var(--accent-dark) 100%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow:
+    0 0 8px var(--torch-glow),
+    0 0 16px rgba(232, 160, 96, 0.4);
+  animation: torch-flame 0.6s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.torch-glow::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  background: radial-gradient(ellipse, rgba(232, 160, 96, 0.3) 0%, transparent 70%);
+  animation: flicker 1.5s ease-in-out infinite;
+}
+
+.station-level--active .torch-glow {
+  opacity: 1;
+}
+
+/* Player count */
+.player-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  min-width: 24px;
+  text-align: right;
+}
+
+.station-level--active .player-count {
+  color: var(--torch-glow);
+  text-shadow: 0 0 5px var(--torch-glow);
+}
+
+/* === SIDEBAR FOOTER === */
+.sidebar-footer {
+  padding: var(--space-md);
+  border-top: 2px solid var(--accent-muted);
+  background: linear-gradient(0deg, rgba(205, 155, 106, 0.06) 0%, transparent 100%);
+  position: relative;
+  z-index: 1;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--star-blue);
+}
+
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-error);
+  box-shadow: 0 0 6px var(--color-error);
+}
+
+.connection-dot--connected {
+  background: var(--color-success);
+  box-shadow: 0 0 10px var(--color-success);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .torch-glow {
+    animation: none;
+  }
+
+  .sidebar-toggle {
+    display: block;
+    position: fixed;
+    left: var(--space-md);
+    top: var(--space-md);
+    z-index: 99;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(42, 26, 58, 0.95) 0%, rgba(26, 10, 32, 0.98) 100%);
+    border: 2px solid var(--accent-muted);
+    color: var(--accent-primary);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(205, 155, 106, 0.2);
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}

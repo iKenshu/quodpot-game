@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game - Ahorcado Multijugador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #a0a0a0;
+        }
+
+        /* Join Screen */
+        .join-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .join-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .join-box h2 {
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .join-box input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .join-box input:focus {
+            border-color: #e94560;
+        }
+
+        .join-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Waiting Screen */
+        .waiting-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .waiting-screen h2 {
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .queue-count {
+            font-size: 3rem;
+            color: #e94560;
+            font-weight: 700;
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .station-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+        }
+
+        .station-info span {
+            color: #a0a0a0;
+        }
+
+        .station-info strong {
+            color: #e94560;
+            font-size: 1.5rem;
+        }
+
+        .attempts {
+            display: flex;
+            gap: 8px;
+        }
+
+        .attempt-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e94560;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .attempt-dot.used {
+            background: #333;
+            transform: scale(0.8);
+        }
+
+        /* Word Display */
+        .word-display {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .word-letters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .letter-box {
+            width: 60px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .letter-box.revealed {
+            background: rgba(233, 69, 96, 0.2);
+            border-color: #e94560;
+            color: #fff;
+        }
+
+        /* Keyboard */
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .key {
+            width: 45px;
+            height: 55px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .key:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .key:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .key.correct {
+            background: #27ae60;
+        }
+
+        .key.wrong {
+            background: #c0392b;
+        }
+
+        /* Players Panel */
+        .players-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .players-panel h3 {
+            margin-bottom: 15px;
+            font-weight: 400;
+            color: #a0a0a0;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-card.you {
+            border: 1px solid #e94560;
+        }
+
+        .player-station {
+            background: #e94560;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Messages */
+        .message-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .message-toast.success {
+            background: #27ae60;
+        }
+
+        .message-toast.error {
+            background: #c0392b;
+        }
+
+        .message-toast.info {
+            background: #3498db;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Game Over */
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+
+        .game-over-content h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .game-over-content.winner h2 {
+            color: #f1c40f;
+        }
+
+        .game-over-content.loser h2 {
+            color: #e94560;
+        }
+
+        .words-used {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .words-used h4 {
+            margin-bottom: 15px;
+            color: #a0a0a0;
+        }
+
+        .words-used ol {
+            padding-left: 25px;
+        }
+
+        .words-used li {
+            padding: 5px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        /* Hidden utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .letter-box {
+                width: 45px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+
+            .key {
+                width: 32px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Maze Game</h1>
+            <p>Ahorcado Multijugador - Completa 10 estaciones para ganar</p>
+        </header>
+
+        <!-- Join Screen -->
+        <div id="joinScreen" class="join-screen">
+            <div class="join-box">
+                <h2>Ingresa tu nombre</h2>
+                <input type="text" id="playerName" placeholder="Tu nombre..." maxlength="20" autofocus>
+                <br>
+                <button class="btn btn-primary" id="joinBtn" onclick="joinGame()">Jugar</button>
+                <p id="connectionStatus" style="margin-top: 20px; color: #a0a0a0;"></p>
+            </div>
+        </div>
+
+        <!-- Waiting Screen -->
+        <div id="waitingScreen" class="waiting-screen hidden">
+            <div class="spinner"></div>
+            <h2>Esperando jugadores...</h2>
+            <p class="queue-count" id="queueCount">1</p>
+            <p style="color: #a0a0a0;">jugadores en cola</p>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-header">
+                <div class="station-info">
+                    <span>Estación</span>
+                    <strong id="currentStation">1</strong>
+                    <span>/ 10</span>
+                </div>
+                <div class="attempts" id="attemptsDisplay">
+                    <div class="attempt-dot"></div>
+                    <div class="attempt-dot"></div>
+                    <div class="attempt-dot"></div>
+                    <div class="attempt-dot"></div>
+                    <div class="attempt-dot"></div>
+                    <div class="attempt-dot"></div>
+                </div>
+            </div>
+
+            <div class="word-display">
+                <div class="word-letters" id="wordDisplay"></div>
+            </div>
+
+            <div class="keyboard" id="keyboard"></div>
+
+            <div class="players-panel">
+                <h3>👥 Jugadores</h3>
+                <div class="players-list" id="playersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameOverOverlay" class="game-over-overlay hidden">
+        <div class="game-over-content" id="gameOverContent">
+            <h2 id="gameOverTitle">¡Fin del Juego!</h2>
+            <p id="gameOverMessage"></p>
+            <div class="words-used">
+                <h4>Las 10 palabras fueron:</h4>
+                <ol id="wordsList"></ol>
+            </div>
+            <button class="btn btn-primary" onclick="location.reload()">Jugar de nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let playerId = null;
+        let playerName = null;
+        let gameId = null;
+        let players = {};
+        let usedLetters = new Set();
+
+        const KEYBOARD_ROWS = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
+            ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+        ];
+
+        function init() {
+            createKeyboard();
+            document.getElementById('playerName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') joinGame();
+            });
+
+            // Add keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('gameScreen').style.display !== 'none') {
+                    const letter = e.key.toUpperCase();
+                    if (/^[A-ZÑ]$/.test(letter) && !usedLetters.has(letter)) {
+                        sendGuess(letter);
+                    }
+                }
+            });
+        }
+
+        function createKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = '';
+
+            KEYBOARD_ROWS.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'keyboard-row';
+
+                row.forEach(letter => {
+                    const key = document.createElement('button');
+                    key.className = 'key';
+                    key.textContent = letter;
+                    key.onclick = () => sendGuess(letter);
+                    key.id = `key-${letter}`;
+                    rowDiv.appendChild(key);
+                });
+
+                keyboard.appendChild(rowDiv);
+            });
+        }
+
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                document.getElementById('connectionStatus').textContent = 'Conectado ✓';
+                document.getElementById('joinBtn').disabled = false;
+            };
+
+            ws.onclose = () => {
+                document.getElementById('connectionStatus').textContent = 'Desconectado. Recargando...';
+                setTimeout(() => location.reload(), 2000);
+            };
+
+            ws.onerror = () => {
+                document.getElementById('connectionStatus').textContent = 'Error de conexión';
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                handleMessage(msg);
+            };
+        }
+
+        function joinGame() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                showToast('Ingresa tu nombre', 'error');
+                return;
+            }
+
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                showToast('Conectando...', 'info');
+                return;
+            }
+
+            playerName = name;
+            ws.send(JSON.stringify({ type: 'join', player_name: name }));
+        }
+
+        function sendGuess(letter) {
+            if (usedLetters.has(letter)) return;
+
+            ws.send(JSON.stringify({ type: 'guess', letter: letter }));
+        }
+
+        function handleMessage(msg) {
+            switch (msg.type) {
+                case 'joined':
+                    playerId = msg.player_id;
+                    gameId = msg.game_id;
+                    if (!msg.game_id) {
+                        showScreen('waiting');
+                    }
+                    break;
+
+                case 'waiting':
+                    document.getElementById('queueCount').textContent = msg.players_in_queue;
+                    break;
+
+                case 'game_start':
+                    players = {};
+                    msg.players.forEach(p => {
+                        players[p.id] = { name: p.name, station: 1 };
+                    });
+                    usedLetters.clear();
+                    resetKeyboard();
+                    showScreen('game');
+                    updatePlayersList();
+                    showToast('¡El juego ha comenzado!', 'success');
+                    break;
+
+                case 'station_update':
+                    document.getElementById('currentStation').textContent = msg.station;
+                    updateWordDisplay(msg.revealed);
+                    updateAttempts(msg.attempts_left);
+                    if (players[playerId]) {
+                        players[playerId].station = msg.station;
+                        updatePlayersList();
+                    }
+                    break;
+
+                case 'correct_guess':
+                    markKey(msg.letter, 'correct');
+                    usedLetters.add(msg.letter);
+                    updateWordDisplay(msg.revealed);
+                    break;
+
+                case 'wrong_guess':
+                    markKey(msg.letter, 'wrong');
+                    usedLetters.add(msg.letter);
+                    updateAttempts(msg.attempts_left);
+                    break;
+
+                case 'station_complete':
+                    showToast(`¡Estación ${msg.station} completada! Palabra: ${msg.word}`, 'success');
+                    usedLetters.clear();
+                    resetKeyboard();
+                    break;
+
+                case 'station_failed':
+                    showToast(`¡Fallaste! La palabra era: ${msg.word}. Vuelves a la estación 1`, 'error');
+                    usedLetters.clear();
+                    resetKeyboard();
+                    break;
+
+                case 'player_progress':
+                    if (players[msg.player_id]) {
+                        players[msg.player_id].station = msg.station;
+                        updatePlayersList();
+
+                        if (msg.station > 1) {
+                            showToast(`${msg.player_name} avanzó a estación ${msg.station}`, 'info');
+                        }
+                    }
+                    break;
+
+                case 'game_over':
+                    showGameOver(msg);
+                    break;
+
+                case 'error':
+                    showToast(msg.message, 'error');
+                    break;
+            }
+        }
+
+        function showScreen(screen) {
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('waitingScreen').classList.add('hidden');
+            document.getElementById('gameScreen').style.display = 'none';
+
+            if (screen === 'join') {
+                document.getElementById('joinScreen').classList.remove('hidden');
+            } else if (screen === 'waiting') {
+                document.getElementById('waitingScreen').classList.remove('hidden');
+            } else if (screen === 'game') {
+                document.getElementById('gameScreen').style.display = 'block';
+            }
+        }
+
+        function updateWordDisplay(revealed) {
+            const container = document.getElementById('wordDisplay');
+            container.innerHTML = '';
+
+            revealed.split(' ').forEach(char => {
+                const box = document.createElement('div');
+                box.className = 'letter-box' + (char !== '_' ? ' revealed' : '');
+                box.textContent = char === '_' ? '' : char;
+                container.appendChild(box);
+            });
+        }
+
+        function updateAttempts(remaining) {
+            const dots = document.querySelectorAll('.attempt-dot');
+            const used = 6 - remaining;
+
+            dots.forEach((dot, i) => {
+                if (i < used) {
+                    dot.classList.add('used');
+                } else {
+                    dot.classList.remove('used');
+                }
+            });
+        }
+
+        function markKey(letter, status) {
+            const key = document.getElementById(`key-${letter}`);
+            if (key) {
+                key.classList.add(status);
+                key.disabled = true;
+            }
+        }
+
+        function resetKeyboard() {
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('correct', 'wrong');
+                key.disabled = false;
+            });
+        }
+
+        function updatePlayersList() {
+            const container = document.getElementById('playersList');
+            container.innerHTML = '';
+
+            Object.entries(players).forEach(([id, player]) => {
+                const card = document.createElement('div');
+                card.className = 'player-card' + (id === playerId ? ' you' : '');
+                card.innerHTML = `
+                    <span>${player.name}${id === playerId ? ' (tú)' : ''}</span>
+                    <span class="player-station">Est. ${player.station}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showGameOver(msg) {
+            const overlay = document.getElementById('gameOverOverlay');
+            const content = document.getElementById('gameOverContent');
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+            const wordsList = document.getElementById('wordsList');
+
+            const isWinner = msg.winner_id === playerId;
+
+            content.className = 'game-over-content ' + (isWinner ? 'winner' : 'loser');
+            title.textContent = isWinner ? '🏆 ¡GANASTE!' : '😢 Fin del Juego';
+            message.textContent = isWinner
+                ? '¡Felicidades! Completaste las 10 estaciones primero.'
+                : `${msg.winner_name} ganó la partida.`;
+
+            wordsList.innerHTML = '';
+            msg.words.forEach(word => {
+                const li = document.createElement('li');
+                li.textContent = word;
+                wordsList.appendChild(li);
+            });
+
+            overlay.classList.remove('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `message-toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        init();
+        connect();
+    </script>
+</body>
+</html>
