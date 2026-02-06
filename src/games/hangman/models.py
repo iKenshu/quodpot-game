@@ -38,7 +38,7 @@ class Station:
         """
         letter = letter.upper()
         if letter in self.guessed_letters:
-            return True  # Already guessed, no penalty
+            return True
 
         self.guessed_letters.add(letter)
 
