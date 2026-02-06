@@ -215,4 +215,3 @@ class TestWordBank:
         words1 = bank.select_words(10)
         words2 = bank.select_words(10)
         assert words1 != words2 or True  # Allow same in rare cases
-        assert words1 != words2 or True  # Allow same in rare cases
