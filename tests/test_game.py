@@ -132,7 +132,6 @@ class TestGameManager:
         game.add_player(player)
         manager.start_game(game)
 
-        # Get first letter of the word
         first_letter = game.words[0][0]
         result = manager.process_guess(game, player, first_letter)
 
@@ -147,7 +146,6 @@ class TestGameManager:
         game.add_player(player)
         manager.start_game(game)
 
-        # Find a letter not in the word
         word = game.words[0]
         wrong_letter = "X" if "X" not in word else "Z"
         result = manager.process_guess(game, player, wrong_letter)
@@ -163,7 +161,6 @@ class TestGameManager:
         game.add_player(player)
         manager.start_game(game)
 
-        # Guess all letters in the word
         word = game.words[0]
         unique_letters = set(word.upper())
         for letter in unique_letters:
@@ -180,14 +177,12 @@ class TestGameManager:
         game.add_player(player)
         manager.start_game(game)
 
-        # First advance to station 2
         word = game.words[0]
         for letter in set(word.upper()):
             manager.process_guess(game, player, letter)
 
         assert player.current_station == 2
 
-        # Now fail station 2 with 6 wrong guesses
         word2 = game.words[1]
         wrong_letters = [
             chr(i) for i in range(ord("A"), ord("Z") + 1) if chr(i) not in word2.upper()
@@ -204,7 +199,6 @@ class TestWordBank:
     """Tests for the WordBank class."""
 
     def test_select_words(self):
-        # Uses the actual words file
         bank = WordBank()
         words = bank.select_words(10)
         assert len(words) == 10
