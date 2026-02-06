@@ -1,10 +1,9 @@
 """Base WebSocket message models shared across games."""
 
-from typing import Literal, Any
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
-
-# Client -> Server Messages (Common)
 
 class JoinMessage(BaseModel):
     type: Literal["join"] = "join"
@@ -18,6 +17,7 @@ class LeaveMessage(BaseModel):
 
 class ClientMessage(BaseModel):
     """Union type for common client messages."""
+
     type: str
 
     @classmethod
@@ -34,10 +34,9 @@ class ClientMessage(BaseModel):
         return None
 
 
-# Server -> Client Messages (Common)
-
 class ServerMessage(BaseModel):
     """Base class for server messages."""
+
     type: str
 
     def to_dict(self) -> dict[str, Any]:
@@ -58,5 +57,7 @@ class WaitingMessage(ServerMessage):
 
 
 class ErrorMessage(ServerMessage):
+    type: Literal["error"] = "error"
+    message: str
     type: Literal["error"] = "error"
     message: str

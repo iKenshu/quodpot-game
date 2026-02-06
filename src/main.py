@@ -2,10 +2,11 @@
 
 from pathlib import Path
 
+import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .websocket.handler import get_ws_handler
 
@@ -15,10 +16,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Static files directory
 STATIC_DIR = Path(__file__).parent / "static"
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,5 +50,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

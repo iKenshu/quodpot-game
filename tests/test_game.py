@@ -1,13 +1,14 @@
 """Tests for game logic."""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
-from src.games.hangman.models import Station, HangmanPlayer, HangmanGame
-from src.models.base import GameStatus
-from src.games.hangman.manager import HangmanGameManager
-from src.services.word_bank import WordBank
+import pytest
+
 from src.config import MAX_ATTEMPTS_PER_WORD, TOTAL_STATIONS
+from src.games.hangman.manager import HangmanGameManager
+from src.games.hangman.models import HangmanGame, HangmanPlayer, Station
+from src.models.base import GameStatus
+from src.services.word_bank import WordBank
 
 
 class TestStation:
@@ -188,7 +189,9 @@ class TestGameManager:
 
         # Now fail station 2 with 6 wrong guesses
         word2 = game.words[1]
-        wrong_letters = [chr(i) for i in range(ord('A'), ord('Z') + 1) if chr(i) not in word2.upper()]
+        wrong_letters = [
+            chr(i) for i in range(ord("A"), ord("Z") + 1) if chr(i) not in word2.upper()
+        ]
 
         for letter in wrong_letters[:MAX_ATTEMPTS_PER_WORD]:
             result = manager.process_guess(game, player, letter)
@@ -211,5 +214,5 @@ class TestWordBank:
         bank = WordBank()
         words1 = bank.select_words(10)
         words2 = bank.select_words(10)
-        # Very unlikely to be the same
+        assert words1 != words2 or True  # Allow same in rare cases
         assert words1 != words2 or True  # Allow same in rare cases

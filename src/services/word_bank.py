@@ -33,7 +33,9 @@ class WordBank:
     def select_words(self, count: int = 10) -> list[str]:
         """Select random words for a game."""
         if count > len(self._words):
-            raise ValueError(f"Cannot select {count} words, only {len(self._words)} available")
+            raise ValueError(
+                f"Cannot select {count} words, only {len(self._words)} available"
+            )
 
         return random.sample(self._words, count)
 
@@ -43,7 +45,6 @@ class WordBank:
         return len(self._words)
 
 
-# Global singleton instance
 _word_bank: WordBank | None = None
 
 

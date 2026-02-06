@@ -1,7 +1,6 @@
-
-from ...config import TOTAL_STATIONS, MAX_ATTEMPTS_PER_WORD, MAX_PLAYERS_PER_GAME
-from ...services.word_bank import get_word_bank
+from ...config import MAX_ATTEMPTS_PER_WORD, MAX_PLAYERS_PER_GAME, TOTAL_STATIONS
 from ...models.base import GameStatus
+from ...services.word_bank import get_word_bank
 from .models import HangmanGame, HangmanPlayer, Station
 
 
@@ -38,10 +37,7 @@ class HangmanGameManager:
     def _init_player_station(self, game: HangmanGame, player: HangmanPlayer) -> None:
         """Initialize a player's current station."""
         word = game.words[player.current_station - 1]
-        player.station_state = Station(
-            word=word,
-            attempts_left=MAX_ATTEMPTS_PER_WORD
-        )
+        player.station_state = Station(word=word, attempts_left=MAX_ATTEMPTS_PER_WORD)
 
     def process_guess(
         self, game: HangmanGame, player: HangmanPlayer, letter: str
@@ -69,7 +65,6 @@ class HangmanGameManager:
 
         letter = letter.upper()
 
-        # Validate letter
         if not letter.isalpha() or len(letter) != 1:
             return {"error": "Invalid letter"}
 
@@ -90,13 +85,11 @@ class HangmanGameManager:
             result["station_complete"] = True
             result["word"] = station.word
 
-            # Check if player won
             if player.current_station >= TOTAL_STATIONS:
                 result["game_won"] = True
                 game.status = GameStatus.FINISHED
                 game.winner = player.id
             else:
-                # Advance to next station
                 player.current_station += 1
                 self._init_player_station(game, player)
 
@@ -104,7 +97,6 @@ class HangmanGameManager:
             result["station_failed"] = True
             result["word"] = station.word
 
-            # Reset to station 1
             player.current_station = 1
             self._init_player_station(game, player)
 
@@ -131,7 +123,9 @@ class HangmanGameManager:
                 return game
         return None
 
-    def add_player_to_active_game(self, game: HangmanGame, player: HangmanPlayer) -> None:
+    def add_player_to_active_game(
+        self, game: HangmanGame, player: HangmanPlayer
+    ) -> None:
         """Add a player to an active game and initialize their station."""
         game.add_player(player)
         self._init_player_station(game, player)
@@ -140,12 +134,10 @@ class HangmanGameManager:
     def active_games(self) -> list[HangmanGame]:
         """Get all active games."""
         return [
-            game for game in self._games.values()
-            if game.status != GameStatus.FINISHED
+            game for game in self._games.values() if game.status != GameStatus.FINISHED
         ]
 
 
-# Global singleton instance
 _hangman_manager: HangmanGameManager | None = None
 
 
