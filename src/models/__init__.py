@@ -1,19 +1,23 @@
-from .game import Player, Game, Station
+from .base import Player, BaseGame, GameStatus
 from .messages import (
     ClientMessage,
     JoinMessage,
-    GuessMessage,
     LeaveMessage,
     ServerMessage,
+    JoinedMessage,
+    WaitingMessage,
+    ErrorMessage,
 )
 
 __all__ = [
     "Player",
-    "Game",
-    "Station",
+    "BaseGame",
+    "GameStatus",
     "ClientMessage",
     "JoinMessage",
-    "GuessMessage",
     "LeaveMessage",
     "ServerMessage",
+    "JoinedMessage",
+    "WaitingMessage",
+    "ErrorMessage",
 ]

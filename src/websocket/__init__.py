@@ -1,4 +1,4 @@
 from .handler import WebSocketHandler
-from .events import EventProcessor
+from .router import GameRouter
 
-__all__ = ["WebSocketHandler", "EventProcessor"]
+__all__ = ["WebSocketHandler", "GameRouter"]

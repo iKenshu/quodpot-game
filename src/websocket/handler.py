@@ -3,11 +3,11 @@
 import json
 from fastapi import WebSocket, WebSocketDisconnect
 
-from ..models.game import Player, Game
-from ..models.messages import ServerMessage
+from ..models.base import Player, BaseGame
+from ..models.messages import ServerMessage, ErrorMessage
 from ..services.matchmaking import get_matchmaking
-from ..services.game_manager import get_game_manager
-from .events import EventProcessor
+from ..games.hangman.manager import get_hangman_manager
+from .router import GameRouter
 
 
 class WebSocketHandler:
@@ -15,7 +15,7 @@ class WebSocketHandler:
 
     def __init__(self):
         self._connections: dict[str, WebSocket] = {}  # player_id -> websocket
-        self._event_processor = EventProcessor(self)
+        self._game_router = GameRouter(self)
 
     async def handle_connection(self, websocket: WebSocket) -> None:
         """Handle a new WebSocket connection."""
@@ -26,7 +26,7 @@ class WebSocketHandler:
             async for message in websocket.iter_text():
                 try:
                     data = json.loads(message)
-                    result = await self._event_processor.process(websocket, data, player_id)
+                    result = await self._game_router.process(websocket, data, player_id)
 
                     if result and "player_id" in result:
                         player_id = result["player_id"]
@@ -51,11 +51,16 @@ class WebSocketHandler:
 
         # Mark as disconnected in game
         game_id = matchmaking.get_player_game(player_id)
-        if game_id:
-            game_manager = get_game_manager()
-            game = game_manager.get_game(game_id)
-            if game:
-                game.remove_player(player_id)
+        game_type = matchmaking.get_player_game_type(player_id)
+
+        if game_id and game_type:
+            if game_type == "hangman":
+                manager = get_hangman_manager()
+                game = manager.get_game(game_id)
+                if game:
+                    game.remove_player(player_id)
+
+        matchmaking.remove_player_from_game(player_id)
 
     async def send_to_player(self, player_id: str, message: ServerMessage) -> None:
         """Send a message to a specific player."""
@@ -73,13 +78,13 @@ class WebSocketHandler:
         except Exception:
             pass
 
-    async def broadcast_to_game(self, game: Game, message: ServerMessage) -> None:
+    async def broadcast_to_game(self, game: BaseGame, message: ServerMessage) -> None:
         """Broadcast a message to all players in a game."""
         for player in game.connected_players:
             await self.send_to_player(player.id, message)
 
     async def broadcast_to_game_except(
-        self, game: Game, message: ServerMessage, except_player_id: str
+        self, game: BaseGame, message: ServerMessage, except_player_id: str
     ) -> None:
         """Broadcast a message to all players except one."""
         for player in game.connected_players:
@@ -94,7 +99,6 @@ class WebSocketHandler:
 
     async def send_error(self, websocket: WebSocket, error_message: str) -> None:
         """Send an error message to a websocket."""
-        from ..models.messages import ErrorMessage
         await self.send_to_websocket(websocket, ErrorMessage(message=error_message))
 
 

@@ -1,122 +1,180 @@
-"""Matchmaking service for player queue management."""
+"""Matchmaking service for player queue management with multi-game support."""
 
 import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Callable, Awaitable
+from typing import Awaitable, Callable
 
-from ..models.game import Player, Game
-from ..config import MAX_PLAYERS_PER_GAME, MIN_PLAYERS_TO_START, MATCHMAKING_TIMEOUT_SECONDS
-from .game_manager import get_game_manager
+from ..config import (
+    MATCHMAKING_TIMEOUT_SECONDS,
+    MAX_PLAYERS_PER_GAME,
+    MIN_PLAYERS_TO_START,
+)
+from ..models.base import BaseGame, GameStatus, Player
 
 
 @dataclass
 class QueuedPlayer:
     """A player waiting in the matchmaking queue."""
+
     player: Player
+    game_type: str
     joined_at: datetime = field(default_factory=datetime.now)
 
 
+@dataclass
+class GameTypeConfig:
+    """Configuration for a specific game type."""
+
+    min_players: int
+    max_players: int
+    timeout_seconds: int
+    game_creator: Callable[[], BaseGame]
+
+
 class Matchmaking:
-    """Manages the matchmaking queue and game creation."""
+    """Manages the matchmaking queue and game creation for multiple game types."""
 
     def __init__(self):
-        self._queue: list[QueuedPlayer] = []
-        self._player_games: dict[str, str] = {}  # player_id -> game_id
-        self._timeout_task: asyncio.Task | None = None
-        self._on_game_start: Callable[[Game], Awaitable[None]] | None = None
+        self._queues: dict[str, list[QueuedPlayer]] = {}
+        self._player_games: dict[str, str] = {}
+        self._player_types: dict[str, str] = {}
+        self._timeout_tasks: dict[str, asyncio.Task] = {}
+        self._callbacks: dict[str, Callable[[BaseGame], Awaitable[None]]] = {}
+        self._configs: dict[str, GameTypeConfig] = {}
+        self._joinable_game_finders: dict[str, Callable[[], BaseGame | None]] = {}
 
-    def set_game_start_callback(
-        self, callback: Callable[[Game], Awaitable[None]]
+    def register_game_type(
+        self,
+        game_type: str,
+        min_players: int,
+        max_players: int,
+        timeout_seconds: int,
+        game_creator: Callable[[], BaseGame],
+        on_game_start: Callable[[BaseGame], Awaitable[None]],
+        joinable_game_finder: Callable[[], BaseGame | None] | None = None,
     ) -> None:
-        """Set the callback to be called when a game starts."""
-        self._on_game_start = callback
+        """Register a new game type with its configuration."""
+        self._configs[game_type] = GameTypeConfig(
+            min_players=min_players,
+            max_players=max_players,
+            timeout_seconds=timeout_seconds,
+            game_creator=game_creator,
+        )
+        self._callbacks[game_type] = on_game_start
+        self._queues[game_type] = []
+        if joinable_game_finder:
+            self._joinable_game_finders[game_type] = joinable_game_finder
 
-    def try_join_active_game(self, player: Player) -> Game | None:
+    def try_join_active_game(self, player: Player, game_type: str) -> BaseGame | None:
         """Try to place a player directly into an active game."""
-        game_manager = get_game_manager()
-        game = game_manager.find_joinable_game()
+        finder = self._joinable_game_finders.get(game_type)
+        if finder is None:
+            return None
 
+        game = finder()
         if game is None:
             return None
 
-        game_manager.add_player_to_active_game(game, player)
+        game.add_player(player)
         self._player_games[player.id] = game.id
+        self._player_types[player.id] = game_type
         return game
 
-    async def add_player(self, player: Player) -> tuple[Game | None, bool]:
+    async def add_player(
+        self, player: Player, game_type: str
+    ) -> tuple[BaseGame | None, bool]:
         """
         Add a player to an active game or the matchmaking queue.
         Returns (Game, True) if late-joined an active game,
         (Game, False) if game started from queue,
         (None, False) if waiting in queue.
         """
-        # Check if player is already in queue or game
-        if any(qp.player.id == player.id for qp in self._queue):
+        if game_type not in self._configs:
             return None, False
 
-        game = self.try_join_active_game(player)
+        config = self._configs[game_type]
+        queue = self._queues[game_type]
+
+        if any(qp.player.id == player.id for qp in queue):
+            return None, False
+
+        game = self.try_join_active_game(player, game_type)
         if game is not None:
             return game, True
 
-        queued = QueuedPlayer(player=player)
-        self._queue.append(queued)
+        queued = QueuedPlayer(player=player, game_type=game_type)
+        queue.append(queued)
+        self._player_types[player.id] = game_type
 
-        # Start timeout task if this is the first player
-        if len(self._queue) == MIN_PLAYERS_TO_START and self._timeout_task is None:
-            self._timeout_task = asyncio.create_task(self._timeout_start())
+        if len(queue) == config.min_players and game_type not in self._timeout_tasks:
+            self._timeout_tasks[game_type] = asyncio.create_task(
+                self._timeout_start(game_type)
+            )
 
-        # Check if we have enough players to start
-        if len(self._queue) >= MAX_PLAYERS_PER_GAME:
-            game = await self._start_game()
+        if len(queue) >= config.max_players:
+            game = await self._start_game(game_type)
             return game, False
 
         return None, False
 
     def remove_player(self, player_id: str) -> None:
         """Remove a player from the queue."""
-        self._queue = [qp for qp in self._queue if qp.player.id != player_id]
+        game_type = self._player_types.get(player_id)
+        if not game_type or game_type not in self._queues:
+            return
 
-        # Cancel timeout if queue is empty
-        if len(self._queue) < MIN_PLAYERS_TO_START and self._timeout_task:
-            self._timeout_task.cancel()
-            self._timeout_task = None
+        queue = self._queues[game_type]
+        self._queues[game_type] = [qp for qp in queue if qp.player.id != player_id]
 
-    async def _timeout_start(self) -> None:
+        config = self._configs.get(game_type)
+        if config and len(self._queues[game_type]) < config.min_players:
+            if game_type in self._timeout_tasks:
+                self._timeout_tasks[game_type].cancel()
+                del self._timeout_tasks[game_type]
+
+        if player_id in self._player_types:
+            del self._player_types[player_id]
+
+    async def _timeout_start(self, game_type: str) -> None:
         """Start the game after a timeout if we have minimum players."""
+        config = self._configs.get(game_type)
+        if not config:
+            return
+
         try:
-            await asyncio.sleep(MATCHMAKING_TIMEOUT_SECONDS)
-            if len(self._queue) >= MIN_PLAYERS_TO_START:
-                await self._start_game()
+            await asyncio.sleep(config.timeout_seconds)
+            queue = self._queues.get(game_type, [])
+            if len(queue) >= config.min_players:
+                await self._start_game(game_type)
         except asyncio.CancelledError:
             pass
 
-    async def _start_game(self) -> Game:
+    async def _start_game(self, game_type: str) -> BaseGame:
         """Create and start a game with queued players."""
-        # Cancel timeout task
-        if self._timeout_task:
-            self._timeout_task.cancel()
-            self._timeout_task = None
+        config = self._configs.get(game_type)
+        if not config:
+            raise ValueError(f"Unknown game type: {game_type}")
 
-        # Take players from queue (up to max)
-        players_to_start = self._queue[:MAX_PLAYERS_PER_GAME]
-        self._queue = self._queue[MAX_PLAYERS_PER_GAME:]
+        if game_type in self._timeout_tasks:
+            self._timeout_tasks[game_type].cancel()
+            del self._timeout_tasks[game_type]
 
-        # Create game
-        game_manager = get_game_manager()
-        game = game_manager.create_game()
+        queue = self._queues[game_type]
+        players_to_start = queue[: config.max_players]
+        self._queues[game_type] = queue[config.max_players :]
 
-        # Add players to game
+        game = config.game_creator()
+
         for queued in players_to_start:
             game.add_player(queued.player)
             self._player_games[queued.player.id] = game.id
 
-        # Start the game
-        game_manager.start_game(game)
+        game.status = GameStatus.PLAYING
 
-        # Notify via callback
-        if self._on_game_start:
-            await self._on_game_start(game)
+        callback = self._callbacks.get(game_type)
+        if callback:
+            await callback(game)
 
         return game
 
@@ -124,23 +182,40 @@ class Matchmaking:
         """Get the game ID for a player."""
         return self._player_games.get(player_id)
 
+    def get_player_game_type(self, player_id: str) -> str | None:
+        """Get the game type for a player."""
+        return self._player_types.get(player_id)
+
     def remove_player_from_game(self, player_id: str) -> None:
         """Remove a player's game association."""
         if player_id in self._player_games:
             del self._player_games[player_id]
+        if player_id in self._player_types:
+            del self._player_types[player_id]
+
+    def get_queue_size(self, game_type: str) -> int:
+        """Get the current queue size for a game type."""
+        return len(self._queues.get(game_type, []))
+
+    def get_queued_players(self, game_type: str) -> list[Player]:
+        """Get all players in the queue for a game type."""
+        queue = self._queues.get(game_type, [])
+        return [qp.player for qp in queue]
 
     @property
     def queue_size(self) -> int:
-        """Get the current queue size."""
-        return len(self._queue)
+        """Get the total queue size across all game types (for backward compatibility)."""
+        return sum(len(q) for q in self._queues.values())
 
     @property
     def queued_players(self) -> list[Player]:
-        """Get all players in the queue."""
-        return [qp.player for qp in self._queue]
+        """Get all players in all queues (for backward compatibility)."""
+        all_players = []
+        for queue in self._queues.values():
+            all_players.extend(qp.player for qp in queue)
+        return all_players
 
 
-# Global singleton instance
 _matchmaking: Matchmaking | None = None
 
 

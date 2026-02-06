@@ -3,9 +3,10 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 
-from src.models.game import Station, Player, Game, GameStatus
+from src.games.hangman.models import Station, HangmanPlayer, HangmanGame
+from src.models.base import GameStatus
+from src.games.hangman.manager import HangmanGameManager
 from src.services.word_bank import WordBank
-from src.services.game_manager import GameManager
 from src.config import MAX_ATTEMPTS_PER_WORD, TOTAL_STATIONS
 
 
@@ -62,11 +63,11 @@ class TestStation:
 
 
 class TestPlayer:
-    """Tests for the Player class."""
+    """Tests for the HangmanPlayer class."""
 
     def test_create_player(self):
         ws = MagicMock()
-        player = Player.create("TestPlayer", ws)
+        player = HangmanPlayer.create("TestPlayer", ws)
         assert player.name == "TestPlayer"
         assert player.id is not None
         assert player.current_station == 1
@@ -74,47 +75,47 @@ class TestPlayer:
 
 
 class TestGame:
-    """Tests for the Game class."""
+    """Tests for the HangmanGame class."""
 
     def test_create_game(self):
         words = ["CASA", "PERRO", "GATO"] + ["WORD"] * 7
-        game = Game.create(words)
+        game = HangmanGame.create(words)
         assert game.id is not None
         assert len(game.id) == 8
         assert game.words == words
         assert game.status == GameStatus.WAITING
 
     def test_add_player(self):
-        game = Game.create(["WORD"] * 10)
+        game = HangmanGame.create(["WORD"] * 10)
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         assert player.id in game.players
         assert game.player_count == 1
 
     def test_remove_player(self):
-        game = Game.create(["WORD"] * 10)
+        game = HangmanGame.create(["WORD"] * 10)
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         game.remove_player(player.id)
         assert game.players[player.id].connected is False
 
 
 class TestGameManager:
-    """Tests for the GameManager class."""
+    """Tests for the HangmanGameManager class."""
 
     def test_create_game(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         assert game is not None
         assert len(game.words) == TOTAL_STATIONS
 
     def test_start_game_initializes_players(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         manager.start_game(game)
 
@@ -123,10 +124,10 @@ class TestGameManager:
         assert player.station_state.word == game.words[0]
 
     def test_process_correct_guess(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         manager.start_game(game)
 
@@ -138,10 +139,10 @@ class TestGameManager:
         assert result["letter"] == first_letter
 
     def test_process_wrong_guess(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         manager.start_game(game)
 
@@ -154,10 +155,10 @@ class TestGameManager:
         assert result["attempts_left"] == MAX_ATTEMPTS_PER_WORD - 1
 
     def test_station_complete_advances_player(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         manager.start_game(game)
 
@@ -171,10 +172,10 @@ class TestGameManager:
         assert player.current_station == 2
 
     def test_station_failed_resets_player(self):
-        manager = GameManager()
+        manager = HangmanGameManager()
         game = manager.create_game()
         ws = MagicMock()
-        player = Player.create("Test", ws)
+        player = HangmanPlayer.create("Test", ws)
         game.add_player(player)
         manager.start_game(game)
 
