@@ -32,14 +32,32 @@ class Matchmaking:
         """Set the callback to be called when a game starts."""
         self._on_game_start = callback
 
-    async def add_player(self, player: Player) -> Game | None:
+    def try_join_active_game(self, player: Player) -> Game | None:
+        """Try to place a player directly into an active game."""
+        game_manager = get_game_manager()
+        game = game_manager.find_joinable_game()
+
+        if game is None:
+            return None
+
+        game_manager.add_player_to_active_game(game, player)
+        self._player_games[player.id] = game.id
+        return game
+
+    async def add_player(self, player: Player) -> tuple[Game | None, bool]:
         """
-        Add a player to the matchmaking queue.
-        Returns a Game if the game starts immediately, None if waiting.
+        Add a player to an active game or the matchmaking queue.
+        Returns (Game, True) if late-joined an active game,
+        (Game, False) if game started from queue,
+        (None, False) if waiting in queue.
         """
         # Check if player is already in queue or game
         if any(qp.player.id == player.id for qp in self._queue):
-            return None
+            return None, False
+
+        game = self.try_join_active_game(player)
+        if game is not None:
+            return game, True
 
         queued = QueuedPlayer(player=player)
         self._queue.append(queued)
@@ -50,9 +68,10 @@ class Matchmaking:
 
         # Check if we have enough players to start
         if len(self._queue) >= MAX_PLAYERS_PER_GAME:
-            return await self._start_game()
+            game = await self._start_game()
+            return game, False
 
-        return None
+        return None, False
 
     def remove_player(self, player_id: str) -> None:
         """Remove a player from the queue."""

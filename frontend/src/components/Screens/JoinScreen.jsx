@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGame } from '../../context/GameContext';
+import { useGameState, useGameActions } from '../../context/GameContext';
 import '../../styles/components/screens.css';
 
 export function JoinScreen() {
   const [playerName, setPlayerName] = useState('');
-  const { joinGame, isConnected } = useGame();
+  const { isConnected } = useGameState();
+  const { joinGame } = useGameActions();
 
   const handleSubmit = (e) => {
     e.preventDefault();

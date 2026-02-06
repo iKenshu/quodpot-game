@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGame, GameState } from '../../context/GameContext';
+import { useGameState, useGameActions, GameState } from '../../context/GameContext';
 import '../../styles/components/screens.css';
 
 export function GameOverOverlay() {
-  const { gameState, winner, playerId, completedWords, resetGame } = useGame();
+  const { gameState, winner, playerId, completedWords } = useGameState();
+  const { resetGame } = useGameActions();
 
   const isVisible = gameState === GameState.GAME_OVER;
   const isWinner = winner?.id === playerId;

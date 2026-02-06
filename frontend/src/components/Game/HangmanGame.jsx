@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGame } from '../../context/GameContext';
+import { useGameState, useGameActions } from '../../context/GameContext';
 import WordDisplay from './WordDisplay';
 import Keyboard from './Keyboard';
 import QuodBall from './QuodBall';
@@ -37,8 +37,8 @@ export function HangmanGame() {
     attemptsLeft,
     guessedLetters,
     lastGuess,
-    guessLetter,
-  } = useGame();
+  } = useGameState();
+  const { guessLetter } = useGameActions();
 
   const sealName = useMemo(
     () => getSealName(currentStation, totalStations),

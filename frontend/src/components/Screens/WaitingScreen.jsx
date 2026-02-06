@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { useGame } from '../../context/GameContext';
+import { useGameState } from '../../context/GameContext';
 import '../../styles/components/screens.css';
 
 export function WaitingScreen() {
-  const { playersInQueue, waitingMessage, playerName } = useGame();
+  const { playersInQueue, waitingMessage, playerName } = useGameState();
 
   return (
     <div className="screen waiting-screen">

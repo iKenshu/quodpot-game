@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGame } from '../../context/GameContext';
+import { useGameState } from '../../context/GameContext';
 import { StationTower } from '../Sidebar';
 import { HangmanGame } from '../Game';
 import { GameOverOverlay } from '../Screens';
 import '../../styles/components/layout.css';
 
 export function GameLayout() {
-  const { playerName } = useGame();
+  const { playerName } = useGameState();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);

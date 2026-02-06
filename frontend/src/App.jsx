@@ -1,9 +1,9 @@
-import { GameProvider, useGame, GameState } from './context/GameContext';
+import { GameProvider, useGameState, GameState } from './context/GameContext';
 import { JoinScreen, WaitingScreen } from './components/Screens';
 import { GameLayout } from './components/Layout';
 
 function GameRouter() {
-  const { gameState } = useGame();
+  const { gameState } = useGameState();
 
   switch (gameState) {
     case GameState.IDLE:

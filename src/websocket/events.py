@@ -18,6 +18,7 @@ from ..models.messages import (
     StationCompleteMessage,
     StationFailedMessage,
     PlayerProgressMessage,
+    PlayerJoinedMessage,
     GameOverMessage,
     ErrorMessage,
     StationStatusMessage,
@@ -92,15 +93,14 @@ class EventProcessor:
         self, websocket: WebSocket, message: JoinMessage
     ) -> dict[str, Any]:
         """Handle a player joining."""
-        # Create player
         player = Player.create(message.player_name, websocket)
 
-        # Add to matchmaking
         matchmaking = get_matchmaking()
-        game = await matchmaking.add_player(player)
+        game, late_join = await matchmaking.add_player(player)
 
-        if game:
-            # Game started immediately (had enough players)
+        if game and late_join:
+            await self._handle_late_join(player, game)
+        elif game:
             await self._handler.send_to_websocket(
                 websocket,
                 JoinedMessage(
@@ -110,7 +110,6 @@ class EventProcessor:
                 ),
             )
         else:
-            # Waiting in queue
             await self._handler.send_to_websocket(
                 websocket,
                 JoinedMessage(
@@ -127,7 +126,6 @@ class EventProcessor:
                 ),
             )
 
-            # Notify all in queue about new player
             await self._handler.broadcast_to_queue(
                 WaitingMessage(
                     players_in_queue=matchmaking.queue_size,
@@ -136,6 +134,49 @@ class EventProcessor:
             )
 
         return {"player_id": player.id}
+
+    async def _handle_late_join(self, player: Player, game: Game) -> None:
+        """Handle a player late-joining an active game."""
+        game_manager = get_game_manager()
+
+        await self._handler.send_to_websocket(
+            player.websocket,
+            JoinedMessage(
+                player_id=player.id,
+                game_id=game.id,
+                player_name=player.name,
+            ),
+        )
+
+        players_info = [
+            {"id": p.id, "name": p.name}
+            for p in game.connected_players
+        ]
+        await self._handler.send_to_websocket(
+            player.websocket,
+            GameStartMessage(
+                players=players_info,
+                total_stations=TOTAL_STATIONS,
+            ),
+        )
+
+        station_info = game_manager.get_player_station_info(player)
+        await self._handler.send_to_websocket(
+            player.websocket,
+            StationUpdateMessage(**station_info),
+        )
+
+        await self._handler.broadcast_to_game_except(
+            game,
+            PlayerJoinedMessage(
+                player_id=player.id,
+                player_name=player.name,
+                station=player.current_station,
+            ),
+            except_player_id=player.id,
+        )
+
+        await self._broadcast_station_status(game)
 
     async def _handle_guess(self, player_id: str, message: GuessMessage) -> None:
         """Handle a letter guess."""

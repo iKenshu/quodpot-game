@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useGame } from '../../context/GameContext';
+import { useGameState } from '../../context/GameContext';
 import StationLevel from './StationLevel';
 import '../../styles/components/sidebar.css';
 
@@ -12,7 +12,7 @@ export function StationTower() {
     players,
     stationStatus,
     isConnected,
-  } = useGame();
+  } = useGameState();
 
   // Build station data from players and station status
   const stationData = useMemo(() => {

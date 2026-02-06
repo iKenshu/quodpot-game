@@ -107,6 +107,13 @@ class PlayerProgressMessage(ServerMessage):
     station: int
 
 
+class PlayerJoinedMessage(ServerMessage):
+    type: Literal["player_joined"] = "player_joined"
+    player_id: str
+    player_name: str
+    station: int
+
+
 class GameOverMessage(ServerMessage):
     type: Literal["game_over"] = "game_over"
     winner_id: str

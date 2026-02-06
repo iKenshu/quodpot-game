@@ -1,7 +1,7 @@
 """Game manager service for handling game logic."""
 
 from ..models.game import Game, Player, Station, GameStatus
-from ..config import TOTAL_STATIONS, MAX_ATTEMPTS_PER_WORD
+from ..config import TOTAL_STATIONS, MAX_ATTEMPTS_PER_WORD, MAX_PLAYERS_PER_GAME
 from .word_bank import get_word_bank
 
 
@@ -121,6 +121,21 @@ class GameManager:
             "revealed": player.station_state.revealed,
             "attempts_left": player.station_state.attempts_left,
         }
+
+    def find_joinable_game(self) -> Game | None:
+        """Find an active game in PLAYING status that has room for more players."""
+        for game in self._games.values():
+            if (
+                game.status == GameStatus.PLAYING
+                and game.player_count < MAX_PLAYERS_PER_GAME
+            ):
+                return game
+        return None
+
+    def add_player_to_active_game(self, game: Game, player: Player) -> None:
+        """Add a player to an active game and initialize their station."""
+        game.add_player(player)
+        self._init_player_station(game, player)
 
     @property
     def active_games(self) -> list[Game]:
