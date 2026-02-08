@@ -1,0 +1,382 @@
+/* === HANGMAN GAME STYLES === */
+
+/* === GAME AREA - MAGICAL NIGHT SKY === */
+.game-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+
+  /* Night sky base gradient */
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(90, 143, 204, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(122, 90, 170, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(80, 200, 120, 0.04) 0%, transparent 40%),
+    linear-gradient(180deg, var(--night-deep) 0%, var(--night-mid) 50%, var(--night-light) 100%);
+  background-size: 200% 200%, 200% 200%, 100% 100%, 100% 100%;
+  animation: aurora-shift 25s ease-in-out infinite;
+}
+
+/* Stars Layer 1 */
+.game-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 10%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 20% 40%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 30% 20%, var(--star-white) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 40% 60%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 50% 30%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 60% 80%, var(--star-white) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 70% 15%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 80% 50%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 90% 70%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 15% 85%, var(--star-white) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 25% 65%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 35% 90%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 45% 5%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 55% 45%, var(--star-blue) 100%, transparent),
+    radial-gradient(1.5px 1.5px at 65% 25%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 75% 95%, var(--star-white) 100%, transparent),
+    radial-gradient(1px 1px at 85% 35%, var(--star-blue) 100%, transparent),
+    radial-gradient(1px 1px at 95% 55%, var(--star-white) 100%, transparent);
+  background-size: 100% 100%;
+  animation: twinkle 5s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Stars Layer 2 */
+.game-area::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(2px 2px at 5% 25%, var(--star-white) 100%, transparent),
+    radial-gradient(2px 2px at 15% 75%, var(--star-blue) 100%, transparent),
+    radial-gradient(2.5px 2.5px at 25% 45%, var(--star-white) 100%, transparent),
+    radial-gradient(2px 2px at 35% 15%, var(--star-blue) 100%, transparent),
+    radial-gradient(2px 2px at 45% 85%, var(--star-white) 100%, transparent),
+    radial-gradient(2.5px 2.5px at 55% 35%, var(--star-white) 100%, transparent),
+    radial-gradient(2px 2px at 65% 65%, var(--star-blue) 100%, transparent),
+    radial-gradient(2px 2px at 75% 5%, var(--star-white) 100%, transparent),
+    radial-gradient(2.5px 2.5px at 85% 55%, var(--star-white) 100%, transparent),
+    radial-gradient(2px 2px at 95% 25%, var(--star-blue) 100%, transparent);
+  background-size: 100% 100%;
+  animation: twinkle-delay 6s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Magical mist layer */
+.game-area .stars-layer-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at 30% 70%, rgba(122, 90, 170, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 30%, rgba(90, 143, 204, 0.04) 0%, transparent 50%);
+  animation: float-mist 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* === STATION HEADER === */
+.station-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+.station-badge {
+  display: inline-block;
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, rgba(42, 26, 58, 0.9) 0%, rgba(26, 10, 32, 0.95) 100%);
+  border: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--accent-light);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(205, 155, 106, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  text-shadow: 0 0 10px rgba(205, 155, 106, 0.4);
+}
+
+/* === HANGMAN CONTAINER === */
+.hangman-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* === WORD DISPLAY === */
+.word-display {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+}
+
+.letter-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 56px;
+  border-bottom: 3px solid var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--star-white);
+  text-transform: uppercase;
+  position: relative;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.letter-slot--revealed {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.letter-slot--revealed::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-success);
+  box-shadow: 0 0 10px var(--color-success);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* === HANGMAN FIGURE === */
+.hangman-figure {
+  width: 200px;
+  height: 250px;
+  position: relative;
+}
+
+.hangman-figure svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hangman-part {
+  stroke: var(--star-white);
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+}
+
+.hangman-part--visible {
+  opacity: 1;
+}
+
+.hangman-part--head {
+  fill: none;
+}
+
+.hangman-structure {
+  stroke: var(--stone-gray-light);
+  stroke-width: 4;
+  fill: none;
+  filter: drop-shadow(0 0 2px rgba(100, 100, 112, 0.4));
+}
+
+/* === ATTEMPTS DISPLAY === */
+.attempts-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.attempts-label {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--star-blue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.attempts-indicators {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.attempt-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-error);
+  box-shadow: 0 0 10px var(--color-error);
+  transition: all var(--transition-normal);
+}
+
+.attempt-dot--available {
+  background: var(--accent-primary);
+  box-shadow: 0 0 10px var(--accent-primary);
+}
+
+.attempt-dot--lost {
+  background: var(--stone-gray);
+  box-shadow: none;
+  animation: shake 0.5s ease-out;
+}
+
+/* === KEYBOARD === */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.key {
+  width: 40px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(42, 26, 58, 0.85) 0%, rgba(26, 10, 32, 0.9) 100%);
+  border: 2px solid var(--accent-muted);
+  color: var(--star-white);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.key:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(60, 40, 80, 0.9) 0%, rgba(40, 24, 50, 0.95) 100%);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(205, 155, 106, 0.2);
+}
+
+.key:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.key:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.key--correct {
+  background: linear-gradient(180deg, rgba(80, 200, 120, 0.7) 0%, rgba(60, 150, 90, 0.8) 100%);
+  border-color: var(--color-success);
+  color: white;
+  box-shadow: 0 0 12px rgba(80, 200, 120, 0.4);
+}
+
+.key--wrong {
+  background: linear-gradient(180deg, rgba(204, 68, 85, 0.7) 0%, rgba(150, 50, 60, 0.8) 100%);
+  border-color: var(--color-error);
+  color: white;
+  opacity: 0.6;
+}
+
+.key--used {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === FEEDBACK MESSAGE === */
+.feedback-message {
+  position: fixed;
+  top: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 100;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.feedback-message--correct {
+  background: linear-gradient(135deg, rgba(80, 200, 120, 0.9) 0%, rgba(60, 150, 90, 0.95) 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(80, 200, 120, 0.4);
+  border: 1px solid var(--color-success);
+}
+
+.feedback-message--wrong {
+  background: linear-gradient(135deg, rgba(204, 68, 85, 0.9) 0%, rgba(150, 50, 60, 0.95) 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(204, 68, 85, 0.4);
+  border: 1px solid var(--color-error);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .game-area {
+    padding: var(--space-lg);
+    padding-top: calc(var(--space-2xl) + 44px);
+  }
+
+  .game-area::before,
+  .game-area::after {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .letter-slot {
+    width: 36px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+
+  .key {
+    width: 32px;
+    height: 40px;
+    font-size: 0.85rem;
+  }
+
+  .hangman-figure {
+    width: 150px;
+    height: 190px;
+  }
+}

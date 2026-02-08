@@ -4,7 +4,7 @@ import { useGameState, useGameActions } from '../../context/GameContext';
 import WordDisplay from './WordDisplay';
 import Keyboard from './Keyboard';
 import QuodBall from './QuodBall';
-import '../../styles/components/game.css';
+import '../../styles/games/hangman/hangman.css';
 
 // Función para obtener el nombre del sello
 const getSealName = (stationNumber, totalStations) => {
@@ -66,7 +66,6 @@ export function HangmanGame() {
 
   return (
     <main className="game-area">
-      {/* Magical mist layer for extra depth */}
       <div className="stars-layer-3" aria-hidden="true" />
 
       <div className="station-header">

@@ -1,0 +1,97 @@
+/* === DUELS THEME === */
+/* Duels-specific color palette with vintage magical aesthetic */
+
+[data-theme="duels"] {
+  /* Gold/Parchment System */
+  --gold-antique: #D4AF37;
+  --gold-light: #F5E6D3;
+  --gold-dark: #8B7355;
+  --gold-muted: #C9B082;
+
+  /* Deep Purple/Void Backgrounds */
+  --void-deep: #0A0612;
+  --void-mid: #1A1228;
+  --void-light: #2D1B3D;
+  --plum-accent: #3D2645;
+
+  /* Map to base theme variables for compatibility */
+  --night-deep: var(--void-deep);
+  --night-mid: var(--void-mid);
+  --night-light: var(--void-light);
+
+  /* Accent colors - Gold theme */
+  --accent-primary: #cd9b6a;
+  --accent-light: #e8c4a0;
+  --accent-dark: #a07850;
+  --accent-muted: #8b7355;
+  --accent-glow: 0 0 15px rgba(205, 155, 106, 0.4);
+  --accent-glow-strong: 0 0 25px rgba(205, 155, 106, 0.6), 0 0 50px rgba(205, 155, 106, 0.3);
+
+  /* Mystical Purple */
+  --mystic-deep: #1a0a20;
+  --mystic-mid: #2a1a3a;
+  --mystic-light: #3d2a50;
+  --mystic-glow: #8a6aaa;
+
+  /* Vintage Spell Colors */
+  --spell-ignis: #E85D3F;
+  --spell-ignis-vintage: #E85D3F;
+  --spell-ignis-glow: rgba(232, 93, 63, 0.5);
+
+  --spell-aqua: #4682B4;
+  --spell-aqua-vintage: #4682B4;
+  --spell-aqua-glow: rgba(70, 130, 180, 0.5);
+
+  --spell-virel: #5F8A64;
+  --spell-virel-vintage: #5F8A64;
+  --spell-virel-glow: rgba(95, 138, 100, 0.5);
+
+  /* Atmospheric Lighting */
+  --candlelight: #FFD394;
+  --moonlight: #D4E5F4;
+  --ink: #2C1810;
+  --vellum: #F4EAD5;
+
+  /* Semantic Colors */
+  --color-success: #50c878;
+  --color-error: #cc4455;
+  --color-warning: #d4a040;
+
+  /* Game-Specific */
+  --duel-victory: rgba(80, 200, 120, 0.3);
+  --duel-defeat: rgba(204, 68, 85, 0.3);
+  --duel-tie: rgba(212, 160, 64, 0.3);
+
+  /* Arena colors */
+  --arena-floor: linear-gradient(180deg, var(--void-deep) 0%, var(--void-mid) 50%, var(--void-light) 100%);
+
+  /* Cross-theme compatibility aliases */
+  --star-white: #f0f0f5;
+  --star-blue: #b8c8e8;
+  --ink-dark: #e8e8f0;
+  --ink-medium: #a8a8b8;
+  --parchment: var(--void-light);
+  --parchment-dark: var(--void-mid);
+  --parchment-light: var(--plum-accent);
+  --aurora-green: var(--color-success);
+  --shadow-purple: var(--mystic-deep);
+
+  /* Stone Textures */
+  --stone-gray: #4a4a58;
+  --stone-gray-light: #606070;
+  --stone-gray-dark: #2a2a35;
+
+  /* Shadows & Depth */
+  --shadow-ornate: 0 8px 24px rgba(10, 6, 18, 0.6),
+                    0 2px 8px rgba(212, 175, 55, 0.1);
+  --glow-candlelight: 0 0 20px rgba(255, 211, 148, 0.4),
+                       0 0 40px rgba(255, 211, 148, 0.2);
+
+  /* Torch/Fire effects */
+  --torch-glow: #e8a060;
+  --torch-glow-light: #f0c080;
+  --torch-core: #ffdd99;
+
+  /* Color for spell status (fallback) */
+  --ignis-color: var(--spell-ignis);
+}

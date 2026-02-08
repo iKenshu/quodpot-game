@@ -1,9 +1,27 @@
 """Game configuration constants."""
 
+# Hangman
 MAX_PLAYERS_PER_GAME = 50
 MIN_PLAYERS_TO_START = 2
 TOTAL_STATIONS = 10
 MAX_ATTEMPTS_PER_WORD = 6
 MATCHMAKING_TIMEOUT_SECONDS = 30
 GAME_TYPE_HANGMAN = "hangman"
+
+# Duels
+GAME_TYPE_DUELS = "duels"
+DUELS_MAX_PLAYERS = 2
+DUELS_MIN_PLAYERS = 2
+DUELS_ROUNDS_TO_WIN = 2
+DUELS_MATCHMAKING_TIMEOUT = 10
+
+# Game mode constants
+GAME_MODE_PVP = "pvp"
+GAME_MODE_PVE = "pve"
+
+# AI player settings
+AI_PLAYER_NAME = "Guardián Arcano"
+AI_RESPONSE_DELAY_SECONDS = 1.5  # Simula tiempo de pensamiento
+
+# WebSocket
 WS_PING_INTERVAL = 30

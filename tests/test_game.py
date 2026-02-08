@@ -4,11 +4,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.config import MAX_ATTEMPTS_PER_WORD, TOTAL_STATIONS
-from src.games.hangman.manager import HangmanGameManager
-from src.games.hangman.models import HangmanGame, HangmanPlayer, Station
-from src.models.base import GameStatus
-from src.services.word_bank import WordBank
+from config import MAX_ATTEMPTS_PER_WORD, TOTAL_STATIONS
+from games.hangman.manager import HangmanGameManager
+from games.hangman.models import HangmanGame, HangmanPlayer, Station
+from models.base import GameStatus
+from services.word_bank import WordBank
 
 
 class TestStation:

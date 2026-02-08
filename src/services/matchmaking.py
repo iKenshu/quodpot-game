@@ -5,12 +5,12 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Awaitable, Callable
 
-from ..config import (
+from config import (
     MATCHMAKING_TIMEOUT_SECONDS,
     MAX_PLAYERS_PER_GAME,
     MIN_PLAYERS_TO_START,
 )
-from ..models.base import BaseGame, GameStatus, Player
+from models.base import BaseGame, GameStatus, Player
 
 
 @dataclass
@@ -76,7 +76,6 @@ class Matchmaking:
         if game is None:
             return None
 
-        game.add_player(player)
         self._player_games[player.id] = game.id
         self._player_types[player.id] = game_type
         return game
@@ -84,11 +83,15 @@ class Matchmaking:
     async def add_player(
         self, player: Player, game_type: str
     ) -> tuple[BaseGame | None, bool]:
-        """
-        Add a player to an active game or the matchmaking queue.
-        Returns (Game, True) if late-joined an active game,
-        (Game, False) if game started from queue,
-        (None, False) if waiting in queue.
+        """Add a player and automatically start game when conditions are met.
+
+        This is the main method for games like Hangman that support late-joining
+        and automatic game start when the queue is full.
+
+        Returns:
+            (Game, True) if late-joined an active game,
+            (Game, False) if game started from queue,
+            (None, False) if waiting in queue.
         """
         if game_type not in self._configs:
             return None, False
@@ -117,6 +120,53 @@ class Matchmaking:
             return game, False
 
         return None, False
+
+    def enqueue_player(self, player: Player, game_type: str) -> bool:
+        """Add a player to the queue without triggering game start.
+
+        Use this for games like Duels that need manual control over when to
+        start the game (e.g., require exactly 2 players, no late-joining).
+        Call try_start_game() separately to check if game can start.
+
+        Returns:
+            True if player was enqueued, False if already in queue or unknown game type.
+        """
+        if game_type not in self._configs:
+            return False
+
+        queue = self._queues[game_type]
+        if any(qp.player.id == player.id for qp in queue):
+            return False
+
+        queued = QueuedPlayer(player=player, game_type=game_type)
+        queue.append(queued)
+        self._player_types[player.id] = game_type
+        return True
+
+    async def try_start_game(self, game_type: str) -> BaseGame | None:
+        """Check if the queue has enough players and start a game if ready.
+
+        Pairs with enqueue_player() for games that need manual start control.
+        Starts game if queue size >= max_players, or after timeout if >= min_players.
+
+        Returns:
+            The game if started, None if still waiting for more players.
+        """
+        if game_type not in self._configs:
+            return None
+
+        config = self._configs[game_type]
+        queue = self._queues[game_type]
+
+        if len(queue) == config.min_players and game_type not in self._timeout_tasks:
+            self._timeout_tasks[game_type] = asyncio.create_task(
+                self._timeout_start(game_type)
+            )
+
+        if len(queue) >= config.max_players:
+            return await self._start_game(game_type)
+
+        return None
 
     def remove_player(self, player_id: str) -> None:
         """Remove a player from the queue."""

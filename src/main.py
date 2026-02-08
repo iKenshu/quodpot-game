@@ -8,12 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .websocket.handler import get_ws_handler
+from websocket.handler import get_ws_handler
 
 app = FastAPI(
-    title="Maze Game",
-    description="Multiplayer maze game with hangman mechanics",
-    version="0.1.0",
+    title="Multi-Game Platform",
+    description="Multiplayer gaming platform featuring Hangman and Arcane Duels",
+    version="0.2.0",
 )
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -30,7 +30,7 @@ app.add_middleware(
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "ok"}
+    return {"status": "ok", "games": ["hangman", "duels"]}
 
 
 app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")

@@ -2,9 +2,10 @@ from typing import Any
 
 from fastapi import WebSocket
 
-from ...config import TOTAL_STATIONS
-from ...models.base import GameStatus
-from ...models.messages import ErrorMessage
+from config import TOTAL_STATIONS
+from models.base import GameStatus
+from models.messages import ErrorMessage
+
 from .manager import get_hangman_manager
 from .messages import (
     CorrectGuessMessage,
@@ -60,6 +61,8 @@ class HangmanEventProcessor:
         game, late_join = await matchmaking.add_player(player, "hangman")
 
         if game and late_join:
+            manager = get_hangman_manager()
+            manager.add_player_to_active_game(game, player)
             await self._handle_late_join(player, game)
 
         return player, game, late_join
@@ -200,7 +203,6 @@ class HangmanEventProcessor:
                 except_player_id=player_id,
             )
 
-            # Broadcast updated station status
             await self._broadcast_station_status(game)
 
     async def on_game_start(self, game: HangmanGame) -> None:
@@ -236,4 +238,5 @@ class HangmanEventProcessor:
             if game:
                 game.remove_player(player_id)
                 if game.connected_players:
+                    await self._broadcast_station_status(game)
                     await self._broadcast_station_status(game)

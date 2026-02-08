@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from fastapi import WebSocket
 
-from ...models.base import BaseGame, GameStatus, Player
+from models.base import BaseGame, GameStatus, Player
 
 
 @dataclass

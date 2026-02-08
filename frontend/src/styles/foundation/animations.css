@@ -1,0 +1,207 @@
+/* === SHARED ANIMATIONS === */
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px var(--torch-glow));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px var(--torch-glow));
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* === MAGICAL NIGHT SKY ANIMATIONS === */
+@keyframes aurora-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes twinkle-delay {
+  0%, 100% { opacity: 0.5; }
+  25% { opacity: 0.2; }
+  75% { opacity: 1; }
+}
+
+@keyframes twinkle-slow {
+  0%, 100% { opacity: 0.4; }
+  33% { opacity: 0.8; }
+  66% { opacity: 0.2; }
+}
+
+@keyframes shooting-star {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(300px) translateY(300px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-mist {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateX(20px) translateY(-10px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(-10px) translateY(5px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateX(15px) translateY(-5px);
+    opacity: 0.35;
+  }
+}
+
+@keyframes torch-flame {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: scaleY(1.1) scaleX(0.95);
+    filter: brightness(1.1);
+  }
+  50% {
+    transform: scaleY(0.95) scaleX(1.05);
+    filter: brightness(0.95);
+  }
+  75% {
+    transform: scaleY(1.05) scaleX(0.98);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes rune-glow {
+  0%, 100% {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    opacity: 0.6;
+  }
+  50% {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    opacity: 1;
+  }
+}
+
+/* === DUEL-SPECIFIC ANIMATIONS === */
+@keyframes spell-charge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px var(--accent-primary);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px var(--accent-primary);
+  }
+}
+
+@keyframes clash-energy {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(205, 155, 106, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(205, 155, 106, 0.6);
+  }
+}
+
+@keyframes spell-burst {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes timer-urgent {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes particle-explode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

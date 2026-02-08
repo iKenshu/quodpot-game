@@ -9,6 +9,7 @@ class JoinMessage(BaseModel):
     type: Literal["join"] = "join"
     player_name: str = Field(..., min_length=1, max_length=20)
     game_type: str = Field(default="hangman")  # Default for backward compatibility
+    game_mode: Literal["pvp", "pve"] = "pvp"  # Game mode for duels
 
 
 class LeaveMessage(BaseModel):

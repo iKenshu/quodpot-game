@@ -1,0 +1,60 @@
+/* === BASE THEME === */
+/* Neutral theme for GameSelector and main pages */
+
+[data-theme="base"],
+:root:not([data-theme]) {
+  /* Hogwarts Nocturno - Night Sky Palette */
+  --night-deep: #080810;
+  --night-mid: #0f0f1a;
+  --night-light: #181828;
+  --aurora-blue: #5a8fcc;
+  --aurora-purple: #7a5aaa;
+  --aurora-green: #50c878;
+  --star-white: #f0f0f5;
+  --star-blue: #b8c8e8;
+
+  /* Legacy colors (kept for compatibility) */
+  --parchment: #181828;
+  --parchment-dark: #0f0f1a;
+  --parchment-light: #202038;
+  --ink-dark: #e8e8f0;
+  --ink-medium: #a8a8b8;
+
+  /* === UNIFIED ACCENT: Antique Bronze/Copper === */
+  --accent-primary: #cd9b6a;
+  --accent-light: #e8c4a0;
+  --accent-dark: #a07850;
+  --accent-muted: #8b7355;
+  --accent-glow: 0 0 15px rgba(205, 155, 106, 0.4);
+  --accent-glow-strong: 0 0 25px rgba(205, 155, 106, 0.6), 0 0 50px rgba(205, 155, 106, 0.3);
+
+  /* Mystical Purple - Color secundario */
+  --mystic-deep: #1a0a20;
+  --mystic-mid: #2a1a3a;
+  --mystic-light: #3d2a50;
+  --mystic-glow: #8a6aaa;
+
+  /* Semantic/Feedback Colors */
+  --color-success: #50c878;
+  --color-error: #cc4455;
+  --color-warning: #d4a040;
+
+  /* Torch/Fire effects */
+  --torch-glow: #e8a060;
+  --torch-glow-light: #f0c080;
+  --torch-core: #ffdd99;
+
+  /* Legacy aliases (used in existing components) */
+  --gold-accent: var(--accent-primary);
+  --gold-light: var(--accent-light);
+  --gold-dark: var(--accent-dark);
+  --blood-red: var(--color-error);
+  --blood-red-light: #dd6677;
+  --torch-glow-light: #f0c080;
+  --shadow-purple: var(--mystic-deep);
+
+  /* Stone Textures */
+  --stone-gray: #4a4a58;
+  --stone-gray-light: #606070;
+  --stone-gray-dark: #2a2a35;
+}

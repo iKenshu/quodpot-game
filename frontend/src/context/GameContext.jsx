@@ -18,6 +18,7 @@ const ActionTypes = {
   SET_PLAYER: 'SET_PLAYER',
   SET_GAME_STATE: 'SET_GAME_STATE',
   SET_GAME_ID: 'SET_GAME_ID',
+  SET_GAME_TYPE: 'SET_GAME_TYPE',
   UPDATE_STATION: 'UPDATE_STATION',
   ADD_GUESSED_LETTER: 'ADD_GUESSED_LETTER',
   UPDATE_PLAYER_PROGRESS: 'UPDATE_PLAYER_PROGRESS',
@@ -29,21 +30,26 @@ const ActionTypes = {
   GAME_STARTED: 'GAME_STARTED',
   CORRECT_GUESS: 'CORRECT_GUESS',
   WRONG_GUESS: 'WRONG_GUESS',
+
+  // Duel-specific actions
+  DUEL_START: 'DUEL_START',
+  DUEL_ROUND_START: 'DUEL_ROUND_START',
+  DUEL_PLAYER_CAST: 'DUEL_PLAYER_CAST',
+  DUEL_OPPONENT_CAST: 'DUEL_OPPONENT_CAST',
+  DUEL_ROUND_RESULT: 'DUEL_ROUND_RESULT',
+  DUEL_OVER: 'DUEL_OVER',
 };
 
 const initialState = {
-  // Player info
   playerId: null,
   playerName: '',
 
-  // Game state
   gameState: GameState.IDLE,
   gameId: null,
+  gameType: null, // 'quodpot' or 'duels'
 
-  // All players in game
   players: [],
 
-  // Station data
   currentStation: 1,
   totalStations: 10,
   revealed: '',
@@ -51,16 +57,28 @@ const initialState = {
   guessedLetters: new Set(),
   lastGuess: null, // { letter, correct }
 
-  // Station status (players per station)
   stationStatus: {}, // { stationNumber: [playerNames] }
 
-  // Waiting room
   playersInQueue: 0,
   waitingMessage: '',
 
-  // Game over
   winner: null,
   completedWords: [],
+
+  // Duel-specific state
+  duel: {
+    opponent: null, // { id, name }
+    currentRound: 1,
+    totalRounds: 5,
+    playerSpell: null,
+    opponentSpell: null,
+    playerScore: [],
+    opponentScore: [],
+    roundResult: null,
+    roundHistory: [],
+    isWinner: null,
+    mode: 'pvp',
+  },
 };
 
 function gameReducer(state, action) {
@@ -82,6 +100,12 @@ function gameReducer(state, action) {
       return {
         ...state,
         gameId: action.payload,
+      };
+
+    case ActionTypes.SET_GAME_TYPE:
+      return {
+        ...state,
+        gameType: action.payload,
       };
 
     case ActionTypes.GAME_STARTED:
@@ -169,6 +193,99 @@ function gameReducer(state, action) {
         playerName: state.playerName,
       };
 
+    case ActionTypes.DUEL_START: {
+      const isAI = action.payload.opponent?.name === 'Guardián Arcano' ||
+                   action.payload.opponent?.id.startsWith('ai_');
+
+      return {
+        ...state,
+        gameState: GameState.PLAYING,
+        gameType: 'duels',
+        duel: {
+          ...state.duel,
+          opponent: action.payload.opponent,
+          currentRound: action.payload.currentRound || 1,
+          totalRounds: action.payload.totalRounds || 5,
+          playerSpell: null,
+          opponentSpell: null,
+          roundResult: null,
+          mode: isAI ? 'pve' : action.payload.mode || 'pvp',
+        },
+      };
+    }
+
+    case ActionTypes.DUEL_ROUND_START:
+      return {
+        ...state,
+        duel: {
+          ...state.duel,
+          currentRound: action.payload.round,
+          playerSpell: null,
+          opponentSpell: null,
+          roundResult: null,
+        },
+      };
+
+    case ActionTypes.DUEL_PLAYER_CAST:
+      return {
+        ...state,
+        duel: {
+          ...state.duel,
+          playerSpell: action.payload.spell,
+        },
+      };
+
+    case ActionTypes.DUEL_OPPONENT_CAST:
+      return {
+        ...state,
+        duel: {
+          ...state.duel,
+          opponentSpell: action.payload.spell || 'pending',
+        },
+      };
+
+    case ActionTypes.DUEL_ROUND_RESULT:
+      return {
+        ...state,
+        duel: {
+          ...state.duel,
+          opponentSpell: action.payload.opponentSpell,
+          roundResult: action.payload.result,
+          playerScore:
+            action.payload.result === 'win'
+              ? [...state.duel.playerScore, action.payload.playerSpell]
+              : state.duel.playerScore,
+          opponentScore:
+            action.payload.result === 'lose'
+              ? [...state.duel.opponentScore, action.payload.opponentSpell]
+              : state.duel.opponentScore,
+          roundHistory: [
+            ...state.duel.roundHistory,
+            {
+              player: action.payload.playerSpell,
+              opponent: action.payload.opponentSpell,
+              winner:
+                action.payload.result === 'win'
+                  ? 'player'
+                  : action.payload.result === 'lose'
+                  ? 'opponent'
+                  : 'tie',
+            },
+          ],
+        },
+      };
+
+    case ActionTypes.DUEL_OVER:
+      return {
+        ...state,
+        gameState: GameState.GAME_OVER,
+        duel: {
+          ...state.duel,
+          isWinner: action.payload.isWinner,
+        },
+        winner: action.payload.winner,
+      };
+
     default:
       return state;
   }
@@ -178,7 +295,6 @@ export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const { isConnected, sendMessage, subscribe } = useWebSocket();
 
-  // Handle joined message
   useEffect(() => {
     return subscribe('joined', (data) => {
       dispatch({
@@ -187,12 +303,12 @@ export function GameProvider({ children }) {
       });
       if (data.game_id) {
         dispatch({ type: ActionTypes.SET_GAME_ID, payload: data.game_id });
+      } else {
         dispatch({ type: ActionTypes.SET_GAME_STATE, payload: GameState.WAITING });
       }
     });
   }, [subscribe]);
 
-  // Handle waiting message
   useEffect(() => {
     return subscribe('waiting', (data) => {
       dispatch({
@@ -202,7 +318,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle game start
   useEffect(() => {
     return subscribe('game_start', (data) => {
       dispatch({
@@ -212,7 +327,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle station update
   useEffect(() => {
     return subscribe('station_update', (data) => {
       dispatch({
@@ -226,7 +340,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle correct guess
   useEffect(() => {
     return subscribe('correct_guess', (data) => {
       dispatch({
@@ -236,7 +349,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle wrong guess
   useEffect(() => {
     return subscribe('wrong_guess', (data) => {
       dispatch({
@@ -246,17 +358,14 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle station complete
   useEffect(() => {
     return subscribe('station_complete', () => {});
   }, [subscribe]);
 
-  // Handle station failed
   useEffect(() => {
     return subscribe('station_failed', () => {});
   }, [subscribe]);
 
-  // Handle player progress
   useEffect(() => {
     return subscribe('player_progress', (data) => {
       dispatch({
@@ -269,7 +378,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle player joined
   useEffect(() => {
     return subscribe('player_joined', (data) => {
       dispatch({
@@ -283,7 +391,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle station status broadcast
   useEffect(() => {
     return subscribe('station_status', (data) => {
       dispatch({
@@ -293,7 +400,6 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle game over
   useEffect(() => {
     return subscribe('game_over', (data) => {
       dispatch({
@@ -306,15 +412,78 @@ export function GameProvider({ children }) {
     });
   }, [subscribe]);
 
-  // Handle error
   useEffect(() => {
     return subscribe('error', () => {});
   }, [subscribe]);
 
+  useEffect(() => {
+    return subscribe('duel_start', (data) => {
+      dispatch({
+        type: ActionTypes.DUEL_START,
+        payload: {
+          opponent: { id: data.opponent_id, name: data.opponent_name },
+          currentRound: 1,
+          totalRounds: data.rounds_to_win || 2,
+        },
+      });
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
+    return subscribe('round_start', (data) => {
+      dispatch({
+        type: ActionTypes.DUEL_ROUND_START,
+        payload: {
+          round: data.round_number,
+        },
+      });
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
+    return subscribe('opponent_cast', () => {
+      dispatch({
+        type: ActionTypes.DUEL_OPPONENT_CAST,
+        payload: { spell: 'pending' },
+      });
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
+    return subscribe('round_result', (data) => {
+      dispatch({
+        type: ActionTypes.DUEL_ROUND_RESULT,
+        payload: {
+          playerSpell: data.your_spell,
+          opponentSpell: data.opponent_spell,
+          result: data.result, // 'win', 'lose', 'tie'
+        },
+      });
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
+    return subscribe('duel_over', (data) => {
+      dispatch({
+        type: ActionTypes.DUEL_OVER,
+        payload: {
+          isWinner: data.winner_id === state.playerId,
+          winner: { id: data.winner_id, name: data.winner_name },
+        },
+      });
+    });
+  }, [subscribe, state.playerId]);
+
   // Actions
-  const joinGame = useCallback((playerName) => {
+  const joinGame = useCallback((playerName, gameType = 'hangman', gameMode = 'pvp') => {
     dispatch({ type: ActionTypes.SET_GAME_STATE, payload: GameState.JOINING });
-    sendMessage({ type: 'join', player_name: playerName });
+    dispatch({ type: ActionTypes.SET_GAME_TYPE, payload: gameType });
+    sendMessage({
+      type: 'join',
+      player_name: playerName,
+      game_type: gameType,
+      game_mode: gameMode
+    });
   }, [sendMessage]);
 
   const guessLetter = useCallback((letter) => {
@@ -330,6 +499,16 @@ export function GameProvider({ children }) {
     dispatch({ type: ActionTypes.RESET_GAME });
   }, []);
 
+  const castSpell = useCallback((spell) => {
+    dispatch({ type: ActionTypes.DUEL_PLAYER_CAST, payload: { spell } });
+    sendMessage({ type: 'spell_cast', spell });
+  }, [sendMessage]);
+
+  const requestRematch = useCallback(() => {
+    sendMessage({ type: 'rematch' });
+    dispatch({ type: ActionTypes.RESET_GAME });
+  }, [sendMessage]);
+
   const stateValue = useMemo(() => ({
     ...state,
     isConnected,
@@ -340,7 +519,9 @@ export function GameProvider({ children }) {
     guessLetter,
     leaveGame,
     resetGame,
-  }), [joinGame, guessLetter, leaveGame, resetGame]);
+    castSpell,
+    requestRematch,
+  }), [joinGame, guessLetter, leaveGame, resetGame, castSpell, requestRematch]);
 
   return (
     <GameActionsContext.Provider value={actionsValue}>

@@ -5,11 +5,11 @@ import logging
 
 from fastapi import WebSocket, WebSocketDisconnect
 
-from ..config import GAME_TYPE_HANGMAN
-from ..models.base import BaseGame
-from ..models.messages import ErrorMessage, ServerMessage
-from ..services.matchmaking import get_matchmaking
-from .router import GameRouter
+from config import GAME_TYPE_HANGMAN
+from models.base import BaseGame
+from models.messages import ErrorMessage, ServerMessage
+from services.matchmaking import get_matchmaking
+from websocket.router import GameRouter
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ class WebSocketHandler:
 
         try:
             await self._game_router.process(
-                websocket if websocket else None,  # May be None
+                websocket if websocket else None,
                 fake_leave,
                 player_id,
             )
@@ -115,6 +115,10 @@ class WebSocketHandler:
             )
             self._matchmaking.remove_player(player_id)
             self._matchmaking.remove_player_from_game(player_id)
+
+    def register_connection(self, player_id: str, websocket: WebSocket) -> None:
+        """Register a player's WebSocket connection."""
+        self._connections[player_id] = websocket
 
     async def send_to_player(self, player_id: str, message: ServerMessage) -> None:
         """Send a message to a specific player by their ID.
@@ -144,10 +148,13 @@ class WebSocketHandler:
         if websocket is None:
             return
 
+        if websocket.client_state.name != "CONNECTED":
+            return
+
         try:
             await websocket.send_text(json.dumps(message.to_dict()))
         except Exception as e:
-            logger.warning(
+            logger.debug(
                 f"Failed to send message: {e}",
                 extra={"message_type": type(message).__name__},
             )

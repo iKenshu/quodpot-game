@@ -1,6 +1,6 @@
-from ...config import MAX_ATTEMPTS_PER_WORD, MAX_PLAYERS_PER_GAME, TOTAL_STATIONS
-from ...models.base import GameStatus
-from ...services.word_bank import get_word_bank
+from config import MAX_ATTEMPTS_PER_WORD, MAX_PLAYERS_PER_GAME, TOTAL_STATIONS
+from models.base import GameStatus
+from services.word_bank import get_word_bank
 from .models import HangmanGame, HangmanPlayer, Station
 
 
