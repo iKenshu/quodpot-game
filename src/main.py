@@ -36,17 +36,20 @@ async def health_check():
 app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
 
-@app.get("/")
-async def index():
-    """Serve the game client."""
-    return FileResponse(STATIC_DIR / "index.html")
-
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for game connections."""
     handler = get_ws_handler()
     await handler.handle_connection(websocket)
+
+
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    """Serve the SPA for all routes (catch-all for client-side routing)."""
+    file_path = STATIC_DIR / full_path
+    if file_path.is_file():
+        return FileResponse(file_path)
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 if __name__ == "__main__":
