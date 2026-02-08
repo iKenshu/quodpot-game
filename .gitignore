@@ -13,7 +13,8 @@ env/
 docs/
 
 .env
-.env.*
+.env.local
+.env.*.local
 
 *.pyc
 *.pyo
